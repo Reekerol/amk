@@ -14,20 +14,20 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:Onest,Arial,sans-serif;background:var(--yellow);color:var(--black);line-height:1.5}
+body{font-family:Onest,Arial,sans-serif;background:#fff;color:var(--black);line-height:1.5}
 a{color:inherit;text-decoration:none}
 :focus-visible{outline:3px solid var(--black);outline-offset:3px}
 
 /* Шапка */
-.top{background:var(--yellow);color:var(--black);padding:var(--pad);padding-bottom:clamp(32px,6vw,72px)}
-.back{display:inline-block;color:var(--grey-dark);font-size:15px;margin-bottom:clamp(32px,6vw,72px);transition:color .2s}
+.top{background:#fff;color:var(--black);padding:var(--pad);padding-top:clamp(14px,2vw,24px);padding-bottom:clamp(16px,2.5vw,32px)}
+.back{display:inline-block;color:var(--grey-dark);font-size:15px;margin-bottom:clamp(14px,2.5vw,28px);transition:color .2s}
 .back:hover{color:var(--black)}
-.top h1{font-family:Unbounded,Arial,sans-serif;font-weight:600;font-size:clamp(28px,6vw,72px);line-height:1.05;max-width:14em}
-.top p{margin-top:20px;color:var(--grey-dark);max-width:34em;font-size:clamp(15px,1.6vw,18px)}
+.top h1{font-family:Unbounded,Arial,sans-serif;font-weight:600;font-size:clamp(24px,4.6vw,56px);line-height:1.05;max-width:14em}
+.top p{margin-top:12px;color:var(--grey-dark);max-width:34em;font-size:clamp(15px,1.6vw,18px)}
 .bar{height:8px;background:var(--black)}
 
 /* Фото лежат в колонках; на десктопе расстановка по колонкам зафиксирована как в макете (см. LAYOUT3 в скрипте) */
-.gallery{padding:var(--pad);max-width:1600px;margin:0 auto;display:flex;align-items:flex-start;gap:var(--gap)}
+.gallery{padding:clamp(16px,2.4vw,32px) var(--pad) var(--pad);max-width:1600px;margin:0 auto;display:flex;align-items:flex-start;gap:var(--gap)}
 .col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:var(--gap)}
 .ph{overflow:hidden;background:var(--grey-light);
   opacity:0;transform:translateY(28px) scale(.97);
@@ -37,13 +37,32 @@ a{color:inherit;text-decoration:none}
 .ph:hover img{transform:scale(1.04)}
 
 .bottom{display:flex;justify-content:center;padding:clamp(8px,2vw,24px) var(--pad) clamp(40px,6vw,80px)}
-.up{display:inline-flex;align-items:center;gap:12px;background:var(--black);color:var(--yellow);border:0;border-radius:4px;cursor:pointer;
+.up{display:inline-flex;align-items:center;gap:12px;background:var(--black);color:#fff;border:0;border-radius:4px;cursor:pointer;
   font-family:Unbounded,Arial,sans-serif;font-weight:500;font-size:clamp(14px,1.6vw,18px);padding:18px 32px;transition:background .25s,color .25s}
 .up:hover,.up:focus-visible{background:var(--grey-dark);color:#fff}
+
+.ph{cursor:zoom-in}
+
+/* Просмотр фото (лайтбокс) */
+.lb{position:fixed;inset:0;z-index:100;background:rgba(29,29,27,.96);display:flex;align-items:center;justify-content:center;padding:clamp(56px,8vw,80px) clamp(12px,6vw,96px);animation:lbin .25s ease}
+.lb[hidden]{display:none}
+@keyframes lbin{from{opacity:0}to{opacity:1}}
+.lb-img{max-width:100%;max-height:100%;object-fit:contain;display:block;opacity:0;transition:opacity .25s;user-select:none;-webkit-user-drag:none}
+.lb-btn{position:absolute;background:none;border:0;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;font-size:30px;line-height:1;transition:background .2s,color .2s}
+.lb-btn:hover,.lb-btn:focus-visible{background:var(--yellow);color:var(--black)}
+.lb :focus-visible{outline:3px solid var(--yellow)}
+.lb-close{top:12px;right:12px}
+.lb-prev,.lb-next{top:50%;transform:translateY(-50%)}
+.lb-prev{left:clamp(4px,1.5vw,20px)}
+.lb-next{right:clamp(4px,1.5vw,20px)}
+.lb-info{position:absolute;left:0;right:0;bottom:0;padding:14px 72px 18px;text-align:center;color:#fff;font-size:clamp(13px,1.4vw,16px)}
+.lb-info small{display:block;color:var(--grey);font-size:13px;margin-top:2px}
+@media (max-width:560px){.lb{padding:56px 0 72px}.lb-prev,.lb-next{top:auto;bottom:10px;transform:none}.lb-info{padding:14px 64px 18px}}
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .ph{opacity:1;transform:none;transition:none}
+  .lb{animation:none}.lb-img{transition:none}
 }
 </style>
 </head>
@@ -61,6 +80,14 @@ a{color:inherit;text-decoration:none}
 </main>
 
 <div class="bottom"><button class="up" type="button" id="toTop">↑ Наверх</button></div>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Просмотр фотографии" hidden>
+  <button class="lb-btn lb-close" type="button" id="lbClose" aria-label="Закрыть">✕</button>
+  <button class="lb-btn lb-prev" type="button" id="lbPrev" aria-label="Предыдущее фото">←</button>
+  <img class="lb-img" id="lbImg" alt="">
+  <button class="lb-btn lb-next" type="button" id="lbNext" aria-label="Следующее фото">→</button>
+  <div class="lb-info"><span id="lbCap"></span><small id="lbCount"></small></div>
+</div>
 
 <script>
 /* Фото: [файл, ширина, высота, подпись]. Чтобы добавить новые — допишите строки в конец списка. */
@@ -80,10 +107,60 @@ const HOME_URL = '';
   else if (parts.length > 2 && !/github\.io$/.test(location.hostname)) back.href = location.protocol + '//' + parts.slice(1).join('.') + '/';
 })();
 
+/* Просмотр фото: клик по фото, листание стрелками, свайпом, клавишами ← → и Esc */
+const lb = document.getElementById('lb'), lbImg = document.getElementById('lbImg'),
+      lbCap = document.getElementById('lbCap'), lbCount = document.getElementById('lbCount');
+let cur = 0, lastFocus = null;
+
+function showLb(i) {
+  cur = (i + photos.length) % photos.length;
+  const [src, , , label] = photos[cur];
+  lbImg.style.opacity = 0;
+  lbImg.onload = () => { lbImg.style.opacity = 1; };
+  lbImg.src = src;
+  lbImg.alt = 'Объект, отделанный материалом АМК: ' + label;
+  lbCap.textContent = label;
+  lbCount.textContent = (cur + 1) + ' / ' + photos.length;
+  [cur + 1, cur - 1].forEach((n) => { new Image().src = photos[(n + photos.length) % photos.length][0]; });
+}
+function openLb(i) {
+  lastFocus = document.activeElement;
+  lb.hidden = false;
+  document.body.style.overflow = 'hidden';
+  showLb(i);
+  document.getElementById('lbClose').focus();
+}
+function closeLb() {
+  lb.hidden = true;
+  document.body.style.overflow = '';
+  if (lastFocus) lastFocus.focus({ preventScroll: true });
+}
+document.getElementById('lbClose').addEventListener('click', closeLb);
+document.getElementById('lbPrev').addEventListener('click', () => showLb(cur - 1));
+document.getElementById('lbNext').addEventListener('click', () => showLb(cur + 1));
+lb.addEventListener('click', (e) => { if (e.target === lb) closeLb(); });
+document.addEventListener('keydown', (e) => {
+  if (lb.hidden) return;
+  if (e.key === 'Escape') closeLb();
+  else if (e.key === 'ArrowLeft') showLb(cur - 1);
+  else if (e.key === 'ArrowRight') showLb(cur + 1);
+});
+let tx = null;
+lb.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
+lb.addEventListener('touchend', (e) => {
+  if (tx === null) return;
+  const dx = e.changedTouches[0].clientX - tx; tx = null;
+  if (Math.abs(dx) > 50) showLb(cur + (dx < 0 ? 1 : -1));
+});
+
 const gallery = document.getElementById('gallery');
-const items = photos.map(([src, w, h, label]) => {
+const items = photos.map(([src, w, h, label], idx) => {
   const el = document.createElement('figure');
   el.className = 'ph';
+  el.tabIndex = 0; el.setAttribute('role', 'button');
+  el.setAttribute('aria-label', 'Открыть фото: ' + label);
+  el.addEventListener('click', () => openLb(idx));
+  el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLb(idx); } });
   const img = new Image();
   img.src = src; img.width = w; img.height = h;
   img.alt = 'Объект, отделанный материалом АМК: ' + label;
